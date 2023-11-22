@@ -1,0 +1,119 @@
+{% assign translations_index = 1 %}
+{% for table in boxes_array %}
+
+    {% capture table_data %}{{ table }}_array{% endcapture %}
+
+    {% stripnewlines %}
+    <table class="usr-width-100">
+        <tbody>
+            {% for line in [table_data] %}
+                    
+                {% comment %} lining {% endcomment %}
+                {% if forloop.first %}
+                    {% assign line_top_bottom = 'usr-line-top' %}
+                {% elsif forloop.last %}
+                    {% assign line_top_bottom = 'usr-line-bottom' %}
+                {% else %}
+                    {% assign line_top_bottom = '' %}
+                {% endif %}
+
+                {% comment %} description content {% endcomment %}
+                {% capture t_description %}t_{{ section_code }}_{{ translations_index }}{% endcapture %}
+
+                {% comment %} //// picking up specific table content to use in table //// {% endcomment %}
+                {% assign line_items = line | split:"&&" %}
+
+                {% comment %} code_left {% endcomment %}
+                {% assign code_left = line_items[0] %}
+                {% if code_left != "" and code_left != code_left_prev %}
+                    {% assign translations_index = 1 %}
+                    {% assign section_code = code_left %}
+                {% endif %}
+
+                {% comment %} code_right {% endcomment %}
+                {% assign code_right = line_items[1] %}
+
+                {% comment %} description indentation level first column {% endcomment %}
+                {% assign indentation = line_items[2] %}
+                
+                {% case indentation %}
+                {% when '2' %}
+                    {% assign indent_col_1 = 'usr-indent-1' %}
+                {% when '3' %}
+                    {% assign indent_col_1 = 'usr-indent-2' %}
+                {% when '4' %}  
+                    {% assign indent_col_1 = 'usr-indent-3' %}
+                {% else %}
+                    {% assign indent_col_1 = '' %}
+                {% endcase %}
+
+                {% capture display_description %}{% t line_items[8] %}{% endcapture %}
+
+                {% comment %} data type left {% endcomment %}
+                {% assign data_type_left = line_items[3] %}
+
+                {% comment %} data type right {% endcomment %}
+                {% assign data_type_left = line_items[4] %}
+
+                {% comment %} column merge settings {% endcomment %}
+                {% assign merge_settings = line_items[5] %}
+                {% if merge_settings contains 'colspan_1_2' %}
+                    {% assign colsp_col_1 = '2' %}
+                {% elsif merge_settings contains 'colspan_3_4' %}
+                    {% assign colsp_col_3 = '2' %}
+                {% elsif merge_settings contains 'colspan_1_full' %}
+                    {% assign colsp_col_1 = '4' %}
+                {% else %}
+                    {% assign colsp_col_1 = '1' %}
+                    {% assign colsp_col_3 = '1' %}
+                {% endif %}
+
+                {% comment %} column width data {% endcomment %}
+                {% assign col_width_data = line_items[6] | split:"_" %}
+                {% assign width_col_1 = col_width_data[0] | default:'50' %}
+                {% assign width_col_2 = col_width_data[1] | default:'25' %}
+                {% assign width_col_3 = col_width_data[2] | default:'25' %}
+
+                {% comment %} column alignment data {% endcomment %}
+                {% assign col_alignment = line_items[7] | split:"_" %}
+
+
+                {% comment %} determine value for codes {% endcomment %}
+                {% assign code_left_array= code_left | split:"-" %}
+                {% assign code_right_array = code_right | split:"-" %}
+                {% capture value_left %}display_code_{{ code_left_array[0] }}{% endcapture %}
+                {% capture value_right %}display_code_{{ code_right_array[0] }}{% endcapture %}
+
+                <tr>
+                    <td colspan='{{ colsp_col_1 }}' class='usr-width-{{ width_col_1 }} {{ indent_col_1 }} usr-line-left {{ line_top_bottom }}'>
+                        {{ [t_description] }}
+                    </td>
+                    <td class='usr-width-{{ width_col_2 }} usr-line-left {{ line_top_bottom }} usr-align-right'>{{ value_2nd_column }}</td>
+                    <td colspan='{{ colsp_col_3 }}' class='usr-width-{{ width_col_3 }} usr-line-left {{ line_top_bottom }}'>
+                        <b>
+                            {::font size="m"}{{ code_left }}{:/font}
+                        </b>
+                        {{ [value_left] | [data_type_left] }}
+                    </td>
+                    <td></td>
+                    <td class='usr-line-left usr-line-right {{ line_top_bottom }}'>
+                        <b>
+                            {::font size="m"}{{ code_right }}{:/font}
+                        </b>
+                        {{ [value_right] | [data_type_right] }}
+                    </td>
+                    <td></td>
+                </tr>
+
+                {% comment %} define left code for previous line, for determining the correct translations variable {% endcomment %}
+                {% assign code_left_prev = code_left %}
+                {% assign translations_index = translations_index+1 | integer %}
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endstripnewlines %}
+
+{% endfor %}
+
+
+
